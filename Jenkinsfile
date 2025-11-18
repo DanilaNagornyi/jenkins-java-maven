@@ -1,4 +1,4 @@
-//def gv
+def gv
 
 pipeline {
     agent any
@@ -21,32 +21,42 @@ pipeline {
         //    }
         //}
         //stage('build app') {
+		stage ('init') {
+			steps {
+				script {
+					gv = load "script.groovy"
+				}
+			}
+		}
         stage('build jar') {
             steps {
                 script {
-                    echo 'building the application...'
-                    sh 'mvn clean package'
+					gv.buildJar()
+                    //echo 'building the application...'
+                    //sh 'mvn clean package'
                 }
             }
         }
         stage('build image') {
             steps {
                 script {
-                    echo "building the docker image..."
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                        //sh "docker build -t artnagornyi/demo-app:${IMAGE_NAME} ."
-                        sh "docker build -t artnagornyi/demo-app:jma-2.0 ."
-                        sh 'echo $PASS | docker login -u $USER --password-stdin'
-                    //    sh "docker push nanatwn/demo-app:${IMAGE_NAME}"
-                        sh "docker push artnagornyi/demo-app:jma-2.0"
-                    }
+					gv.buildImage()
+                    //echo "building the docker image..."
+                    //withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    //    //sh "docker build -t artnagornyi/demo-app:${IMAGE_NAME} ."
+                    //    sh "docker build -t artnagornyi/demo-app:jma-2.0 ."
+                    //    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    ////    sh "docker push artnagornyi/demo-app:${IMAGE_NAME}"
+                    //    sh "docker push artnagornyi/demo-app:jma-2.0"
+                    //}
                 }
             }
         }
         stage('deploy') {
             steps {
                 script {
-                    echo 'deploying docker image...'
+					gv.deployApp()
+                    //echo 'deploying docker image...'
                 }
             }
         }
