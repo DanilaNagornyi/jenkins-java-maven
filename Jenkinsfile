@@ -2,9 +2,10 @@
 
 pipeline {
     agent any
-    //tools {
-    //    maven 'Maven'
-    //}
+    tools {
+        //maven 'Maven'
+        maven 'maven-3.9'
+    }
     stages {
         //stage('increment version') {
         //    steps {
@@ -19,11 +20,12 @@ pipeline {
         //        }
         //    }
         //}
-        stage('build app') {
+        //stage('build app') {
+        stage('build jar') {
             steps {
                 script {
                     echo 'building the application...'
-                    //sh 'mvn clean package'
+                    sh 'mvn clean package'
                 }
             }
         }
@@ -31,11 +33,13 @@ pipeline {
             steps {
                 script {
                     echo "building the docker image..."
-                    //withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                    //    sh "docker build -t nanatwn/demo-app:${IMAGE_NAME} ."
-                    //    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        //sh "docker build -t artnagornyi/demo-app:${IMAGE_NAME} ."
+                        sh "docker build -t artnagornyi/demo-app:jma-2.0 ."
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
                     //    sh "docker push nanatwn/demo-app:${IMAGE_NAME}"
-                    //}
+                        sh "docker push artnagornyi/demo-app:jma-2.0"
+                    }
                 }
             }
         }
