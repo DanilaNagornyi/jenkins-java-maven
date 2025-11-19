@@ -10,7 +10,7 @@ def gv
 pipeline {   
     agent any
     tools {
-        maven 'Maven'
+        maven 'maven-3.9'
     }
     stages {
         stage("init") {
@@ -32,7 +32,7 @@ pipeline {
         stage("build and push image") {
             steps {
                 script {
-					buildImage()
+					buildImage 'artnagornyi/demo-app:jma-3.0'
                     //buildImage 'nanatwn/demo-app:jma-3.0'
                     //dockerLogin()
                     //dockerPush 'nanatwn/demo-app:jma-3.0'
