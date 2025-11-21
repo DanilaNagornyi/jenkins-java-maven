@@ -90,7 +90,7 @@ pipeline {
                 '''
 
 						sh '''
-                    git push https://x-access-token:${GITHUB_TOKEN}@github.com/DanilaNagornyi/jenkins-java-maven.git HEAD:jenkins-jobs
+                    git push --force https://x-access-token:${GITHUB_TOKEN}@github.com/DanilaNagornyi/jenkins-java-maven.git HEAD:jenkins-jobs
                 '''
 					}
 				}
