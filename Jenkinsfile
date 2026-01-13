@@ -25,6 +25,7 @@ pipeline {
             steps {
                 script {
                    echo 'deploying docker image...'
+                   sh 'aws eks update-kubeconfig --name demo-cluster --region ap-southeast-2'
                    sh 'kubectl create deployment nginx-deployment --image=nginx'
                 }
             }
