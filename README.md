@@ -1,377 +1,72 @@
-# Jenkins Java Maven CI/CD Pipeline
+# Complete CI/CD Pipeline with AWS EKS and ECR
 
 <div align="center">
 
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
 ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white)
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Maven](https://img.shields.io/badge/Apache_Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Groovy](https://img.shields.io/badge/Groovy-4298B8?style=for-the-badge&logo=apache-groovy&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
 </div>
 
-## 📋 About
+This capstone project demonstrates an automated CI/CD pipeline for a Java Spring Boot application. Jenkins builds and packages the application, creates a Docker image, pushes it to a private Amazon ECR repository, and deploys the new version to an Amazon EKS cluster.
 
-Jenkins CI/CD pipeline project demonstrating Multibranch Pipeline with modular Groovy scripts. The project showcases separation of pipeline logic, automated Maven builds, Docker image creation, and push to DockerHub registry.
+## Technologies
 
-## 🎯 Key Features
-
-- 🔄 **Multibranch Pipeline** - Automated builds for multiple branches
-- 📦 **Modular Groovy Scripts** - Reusable pipeline logic
-- 🚀 **Maven Build Automation** - Spring Boot JAR creation
-- 🐳 **Docker Integration** - Automated image build and push
-- 🔐 **Credentials Management** - Secure DockerHub authentication
-- 📊 **Build Stages** - Clear separation of concerns
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│            Jenkins Pipeline Stages              │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  1. Init                                        │
-│     └── Load script.groovy                     │
-│                                                 │
-│  2. Build JAR                                   │
-│     └── mvn clean package                      │
-│                                                 │
-│  3. Build Image                                 │
-│     ├── docker build                           │
-│     ├── docker login                           │
-│     └── docker push to DockerHub              │
-│                                                 │
-│  4. Deploy                                      │
-│     └── Placeholder for deployment logic       │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
-## 🛠️ Technology Stack
-
-### Backend
-- **Java 8** - Programming language
-- **Spring Boot 2.3.5** - Application framework
-- **Maven 3.9** - Build automation tool
-- **Amazon Corretto 8** - JRE runtime
-
-### CI/CD
-- **Jenkins** - Automation server
-- **Groovy** - Pipeline scripting language
-- **Declarative Pipeline** - Pipeline-as-Code
-
-### DevOps
-- **Docker** - Containerization platform
-- **DockerHub** - Container registry
-- **Alpine Linux** - Lightweight base image
-
-## 📂 Project Structure
-
-```
-.
-├── src/                        # Java source code
-├── target/                     # Maven build output
-├── Jenkinsfile                 # Pipeline definition
-├── script.groovy              # Modular pipeline functions
-├── Dockerfile                  # Docker image definition
-├── freestyle-build.sh         # Freestyle project script
-└── pom.xml                    # Maven configuration
-```
-
-## 🔄 Pipeline Stages
-
-### Stage 1: Init
-```groovy
-Load external Groovy script for modular pipeline functions
-- Loads script.groovy
-- Makes functions available to pipeline
-```
-
-### Stage 2: Build JAR
-```groovy
-buildJar()
-- Execute: mvn clean package
-- Creates Spring Boot executable JAR
-- Output: target/java-maven-app-*.jar
-```
-
-### Stage 3: Build Image
-```groovy
-buildImage()
-- Build Docker image: artnagornyi/demo-app:jma-2.0
-- Login to DockerHub using credentials
-- Push image to registry
-```
-
-### Stage 4: Deploy
-```groovy
-deployApp()
-- Placeholder for deployment logic
-- Can be extended for Kubernetes/EC2/etc.
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Java 8+
-- Maven 3.9+
+- Jenkins and Groovy
+- Java, Spring Boot, and Maven
 - Docker
-- Jenkins with plugins:
-  - Pipeline
-  - Git
-  - Credentials
-  - Docker Pipeline
+- Amazon ECR
+- Amazon EKS and Kubernetes
+- Git and GitHub
 
-### Jenkins Setup
+## Pipeline Flow
 
-#### 1. Create Multibranch Pipeline Project
+The pipeline in `Jenkinsfile` performs the following stages:
 
-```
-New Item → Multibranch Pipeline
-```
+1. **Increment version** - increments the application version in `pom.xml` and creates an image tag from the application version and Jenkins build number.
+2. **Build application** - runs `mvn clean package` to test and package the Spring Boot application.
+3. **Build and push image** - builds the Docker image and pushes it to the private Amazon ECR repository.
+4. **Deploy to EKS** - substitutes the pipeline environment variables in the Kubernetes manifests and applies them with `kubectl`.
+5. **Commit version update** - commits the updated application version and pushes it back to the `jenkins-jobs` branch.
 
-#### 2. Configure Branch Sources
+## Kubernetes Deployment
 
-- **Source:** Git
-- **Repository URL:** https://github.com/DanilaNagornyi/jenkins-java-maven.git
-- **Credentials:** (Add GitHub credentials if private)
+The `kubernetes` directory contains:
 
-#### 3. Add DockerHub Credentials
+- `deployment.yaml` - deploys two replicas of the application and pulls the versioned image from ECR.
+- `service.yaml` - exposes the application on port 80 and routes traffic to container port 8080.
 
-```
-Jenkins → Credentials → Add Credentials
-- Type: Username with password
-- ID: docker-hub-repo
-- Username: [Your DockerHub username]
-- Password: [Your DockerHub password/token]
-```
+The deployment uses the `aws-registry-key` image pull secret to access the private ECR repository.
 
-#### 4. Configure Maven Tool
+## Repository Structure
 
-```
-Jenkins → Global Tool Configuration → Maven
-- Name: maven-3.9
-- Install automatically or specify MAVEN_HOME
-```
-
-### Local Build
-
-```bash
-# Clone repository
-git clone https://github.com/DanilaNagornyi/jenkins-java-maven.git
-cd jenkins-java-maven
-
-# Build with Maven
-mvn clean package
-
-# Build Docker image
-docker build -t demo-app .
-
-# Run container
-docker run -p 8080:8080 demo-app
+```text
+.
+├── src/                         # Java application source and tests
+├── kubernetes/
+│   ├── deployment.yaml          # Kubernetes Deployment
+│   └── service.yaml             # Kubernetes Service
+├── Dockerfile                   # Application container image
+├── Jenkinsfile                  # Complete CI/CD pipeline
+├── pom.xml                      # Maven configuration and application version
+└── script.groovy                # Groovy functions used during Jenkins exercises
 ```
 
-Application will be available at `http://localhost:8080`
+## Prerequisites
 
-## 📝 Pipeline Configuration
+The pipeline expects the following infrastructure and Jenkins configuration:
 
-### Jenkinsfile
-```groovy
-def gv
+- an Amazon EKS cluster and a private Amazon ECR repository;
+- Jenkins with Maven 3.9, Docker, `kubectl`, and access to the EKS cluster;
+- an `aws-registry-key` secret in the Kubernetes cluster;
+- Jenkins credentials with the IDs used in `Jenkinsfile` for ECR, AWS, and GitHub access.
 
-pipeline {
-    agent any
-    tools {
-        maven 'maven-3.9'
-    }
-    stages {
-        stage('init') {
-            steps {
-                script {
-                    gv = load "script.groovy"
-                }
-            }
-        }
-        stage('build jar') {
-            steps {
-                script {
-                    gv.buildJar()
-                }
-            }
-        }
-        stage('build image') {
-            steps {
-                script {
-                    gv.buildImage()
-                }
-            }
-        }
-        stage('deploy') {
-            steps {
-                script {
-                    gv.deployApp()
-                }
-            }
-        }
-    }
-}
-```
+The supporting Jenkins-to-EKS configuration and setup notes are documented in the [deploy-to-eks-from-jenkins](https://github.com/DanilaNagorniy/deploy-to-eks-from-jenkins) repository.
 
-### script.groovy
-```groovy
-def buildJar() {
-    echo 'building the application...'
-    sh 'mvn clean package'
-}
+## What I Learned
 
-def buildImage() {
-    echo "building the docker image..."
-    withCredentials([usernamePassword(
-        credentialsId: 'docker-hub-repo',
-        passwordVariable: 'PASS',
-        usernameVariable: 'USER'
-    )]) {
-        sh "docker build -t artnagornyi/demo-app:jma-2.0 ."
-        sh 'echo $PASS | docker login -u $USER --password-stdin'
-        sh "docker push artnagornyi/demo-app:jma-2.0"
-    }
-}
-
-def deployApp() {
-    echo 'deploying the application...'
-}
-
-return this
-```
-
-## 🐳 Dockerfile
-
-```dockerfile
-FROM amazoncorretto:8-alpine3.17-jre
-
-EXPOSE 8080
-
-COPY ./target/java-maven-app-*.jar /usr/app/
-WORKDIR /usr/app
-
-CMD java -jar java-maven-app-*.jar
-```
-
-**Features:**
-- Lightweight Alpine-based image
-- Amazon Corretto JRE 8
-- Exposes port 8080
-- Runs Spring Boot application
-
-## 🔐 Security Best Practices
-
-- ✅ Credentials stored in Jenkins Credentials Manager
-- ✅ Passwords never hardcoded in pipeline
-- ✅ Docker login with stdin to avoid command history
-- ✅ Separate Groovy script for better code organization
-
-## 📊 Modular Pipeline Benefits
-
-### Why External Groovy Script?
-
-1. **Reusability** - Functions can be used across multiple pipelines
-2. **Maintainability** - Easier to update logic in one place
-3. **Readability** - Jenkinsfile stays clean and declarative
-4. **Testing** - Groovy functions can be tested independently
-5. **Separation of Concerns** - Pipeline structure vs. implementation
-
-## 🔧 Extension Ideas
-
-### Add Version Increment Stage
-```groovy
-stage('increment version') {
-    steps {
-        script {
-            sh 'mvn build-helper:parse-version versions:set \
-                -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.nextIncrementalVersion} \
-                versions:commit'
-        }
-    }
-}
-```
-
-### Add Automated Tests
-```groovy
-stage('test') {
-    steps {
-        script {
-            sh 'mvn test'
-        }
-    }
-}
-```
-
-### Add Version Commit Stage
-```groovy
-stage('commit version') {
-    steps {
-        script {
-            withCredentials([usernamePassword(
-                credentialsId: 'github-credentials',
-                passwordVariable: 'PASS',
-                usernameVariable: 'USER'
-            )]) {
-                sh 'git config user.email "jenkins@example.com"'
-                sh 'git config user.name "jenkins"'
-                sh 'git add pom.xml'
-                sh 'git commit -m "ci: version bump"'
-                sh 'git push origin HEAD:main'
-            }
-        }
-    }
-}
-```
-
-## 🎯 Freestyle vs Pipeline
-
-This project focuses on **Pipeline** approach:
-
-| Freestyle | Pipeline |
-|-----------|----------|
-| UI-based configuration | Code-based (Pipeline as Code) |
-| Limited version control | Full Git integration |
-| Hard to share/replicate | Easy to version and share |
-| Less flexible | Highly flexible with Groovy |
-
-The `freestyle-build.sh` is kept for comparison purposes.
-
-## 📈 Multibranch Pipeline Features
-
-- 🌿 **Automatic branch detection** - Scans repository for branches
-- 🔄 **Branch-specific builds** - Each branch has its own build history
-- 🗑️ **Automatic cleanup** - Removes jobs for deleted branches
-- 🔀 **PR/MR support** - Can build pull/merge requests
-- 📋 **Shared configuration** - Same Jenkinsfile for all branches
-
-## 🤝 Contributing
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is created for educational purposes.
-
-## 👨‍💻 Author
-
-**Danila Nagornyi**
-
-- GitHub: [@DanilaNagornyi](https://github.com/DanilaNagornyi)
-
----
-
-<div align="center">
-
-⭐ Star this repo if you find it useful!
-
-</div>
+This project gave me practical experience connecting several CI/CD stages into one Jenkins pipeline. I worked with Groovy pipeline scripts, Jenkins credentials, application versioning, Docker images in a private AWS registry, and automated Kubernetes deployments to EKS. I also learned how the CI and deployment parts depend on credentials, cluster access, and consistent environment variables across Jenkins and Kubernetes manifests.
